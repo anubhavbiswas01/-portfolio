@@ -1688,3 +1688,33 @@ html {
   align-items: center;
   gap: 0.25rem;
 }
+
+/* Header Social Links */
+.header-socials {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-left: 1.5rem;
+  border-left: 1px solid var(--glass-border);
+  padding-left: 1.5rem;
+}
+
+.social-icon-link {
+  color: var(--text-secondary);
+  transition: var(--transition-quick);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-icon-link:hover {
+  color: var(--accent-cyan);
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px var(--accent-cyan));
+}
+
+@media (max-width: 1024px) {
+  .header-socials {
+    display: none;
+  }
+}
