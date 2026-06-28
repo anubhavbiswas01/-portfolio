@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Anubhav Biswas | 3D Creative Portfolio</title>
+  <meta name="description" content="Explore the interactive 3D portfolio of an innovative creative developer specializing in WebGL, Three.js, GSAP, and premium front-end web experiences.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Entry -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Full Screen Preloader -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-content">
+      <div class="preloader-logo split-chars">ANUBHAV</div>
+      <div class="preloader-bar-container">
+        <div class="preloader-bar" id="preloader-bar"></div>
+      </div>
+      <span class="preloader-text">Loading Dimensions...</span>
+    </div>
+  </div>
+
+  <!-- 3D Canvas Background -->
+  <canvas class="webgl" id="webgl-canvas"></canvas>
+
+  <!-- Interactive Custom Cursor Dot -->
+  <div class="custom-cursor" id="custom-cursor"></div>
+  <div class="custom-cursor-glow" id="custom-cursor-glow"></div>
+
+  <!-- Main Scroll Container -->
+  <main class="scroll-container">
+    
+    <!-- Header / Navigation -->
+    <header class="main-header" id="main-header">
+      <div class="header-container">
+        <a href="#hero" class="logo" id="header-logo">
+          <span class="logo-text split-chars">ANUBHAV</span>
+        </a>
+        
+        <nav class="nav-links" id="nav-links">
+          <a href="#hero" class="nav-item active" id="nav-link-hero">Home</a>
+          <a href="#about" class="nav-item" id="nav-link-about">About</a>
+          <a href="#projects" class="nav-item" id="nav-link-projects">Projects</a>
+          <a href="#contact" class="nav-item" id="nav-link-contact">Contact</a>
+        </nav>
+        
+        <div class="header-actions">
+          <a href="#contact" class="btn btn-secondary btn-sm" id="header-cta">Hire Me</a>
+          <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mobile-nav" id="mobile-nav">
+      <nav class="mobile-nav-links">
+        <a href="#hero" class="mobile-nav-item" id="mobile-nav-hero">Home</a>
+        <a href="#about" class="mobile-nav-item" id="mobile-nav-about">About</a>
+        <a href="#projects" class="mobile-nav-item" id="mobile-nav-projects">Projects</a>
+        <a href="#contact" class="mobile-nav-item" id="mobile-nav-contact">Contact</a>
+        <a href="#contact" class="btn btn-primary" id="mobile-nav-cta">Hire Me</a>
+      </nav>
+    </div>
+
+    <!-- Section 1: Hero -->
+    <section class="section hero-section" id="hero">
+      <div class="container hero-container">
+        <div class="hero-content">
+
+          <h1 class="hero-title" id="hero-title">
+            Hi, I'm <span class="text-gradient split-chars">Anubhav Biswas</span>
+          </h1>
+          <p class="hero-subtitle" id="hero-subtitle">
+            I'm an IT undergraduate from University of Calcutta (Class of '28) and studying Data Science & AI at IIT Guwahati.
+          </p>
+          <div class="hero-buttons">
+            <a href="#projects" class="btn btn-primary" id="hero-btn-work">View Projects</a>
+            <a href="#about" class="btn btn-outline" id="hero-btn-about">Learn More</a>
+          </div>
+        </div>
+        
+        <div class="hero-scroll-indicator" id="hero-scroll-indicator">
+          <span class="mouse-icon">
+            <span class="mouse-wheel"></span>
+          </span>
+          <span class="scroll-text">Scroll Down</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: About / Skills -->
+    <section class="section about-section" id="about">
+      <div class="container about-container-layout">
+        
+        <!-- Profile Column -->
+        <div class="about-profile-panel" id="about-profile">
+          <div class="profile-frame">
+            <div class="profile-glow"></div>
+            <img src="/profile.png" alt="Anubhav Biswas" class="profile-image" id="profile-pic">
+          </div>
+          <div class="profile-bio">
+            <span class="section-label">About Me</span>
+            <h2 class="section-title">Anubhav Biswas</h2>
+            <p class="bio-text">
+              I am an Information Technology student at the University of Calcutta and studying Data Science & AI at IIT Guwahati. I merge analytical models with WebGL and frontend creative coding to build multidimensional digital experiences.
+            </p>
+          </div>
+        </div>
+
+        <!-- Skills Column -->
+        <div class="skills-column">
+          <div class="section-header">
+            <span class="section-label">Capabilities</span>
+            <h2 class="section-title">My Creative Stack</h2>
+          </div>
+          
+          <div class="skills-grid">
+            <!-- Card 1: 3D Graphics -->
+            <div class="skill-card tilt-card" id="skill-card-3d">
+              <div class="card-glow"></div>
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+              </div>
+              <h3 class="card-title">Creative 3D Coding</h3>
+              <p class="card-text">Building custom 3D particle systems, realistic shaders, geometry animation, lighting, and camera paths in Three.js and WebGL.</p>
+              <div class="card-tags">
+                <span>Three.js</span>
+                <span>WebGL</span>
+                <span>GLSL Shaders</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Frontend Engineering -->
+            <div class="skill-card tilt-card" id="skill-card-frontend">
+              <div class="card-glow"></div>
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              </div>
+              <h3 class="card-title">Front-End Mastery</h3>
+              <p class="card-text">Developing responsive, pixel-perfect layouts using modular modern JavaScript, state management, and optimized asset loading.</p>
+              <div class="card-tags">
+                <span>ES6+ JS</span>
+                <span>Vite</span>
+                <span>Responsive Web</span>
+              </div>
+            </div>
+
+            <!-- Card 3: Interaction & GSAP -->
+            <div class="skill-card tilt-card" id="skill-card-interaction">
+              <div class="card-glow"></div>
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+              </div>
+              <h3 class="card-title">Fluid Motion & FX</h3>
+              <p class="card-text">Crafting organic micro-interactions, complex scroll-linked timelines, state transitions, and high-performance layout physics.</p>
+              <div class="card-tags">
+                <span>GSAP</span>
+                <span>ScrollTrigger</span>
+                <span>Lenis Scroll</span>
+              </div>
+            </div>
+
+            <!-- Card 4: Data Science & AI -->
+            <div class="skill-card tilt-card" id="skill-card-arch">
+              <div class="card-glow"></div>
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              </div>
+              <h3 class="card-title">Data Science & AI</h3>
+              <p class="card-text">Analyzing complex datasets, designing neural networks, and integrating intelligent algorithms directly into web representations.</p>
+              <div class="card-tags">
+                <span>Python</span>
+                <span>IIT Guwahati</span>
+                <span>Machine Learning</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 3: Projects -->
+    <section class="section projects-section" id="projects">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Portfolio</span>
+          <h2 class="section-title">Selected Creations</h2>
+          <p class="section-description">A collection of custom projects blending interactive 3D and modern front-end concepts.</p>
+        </div>
+
+        <div class="projects-grid">
+          <!-- Project 1 -->
+          <article class="project-card" id="project-1">
+            <div class="project-image-container">
+              <div class="project-overlay-glow"></div>
+              <div class="project-visual-mock" style="background: linear-gradient(135deg, rgba(236, 56, 188, 0.2) 0%, rgba(115, 3, 192, 0.4) 100%);">
+                <div class="floating-mock-element shape-torus"></div>
+                <div class="glow-point"></div>
+              </div>
+            </div>
+            <div class="project-info">
+              <div class="project-meta">
+                <span class="project-category">Coming Soon</span>
+              </div>
+              <h3 class="project-name">Quantum Ledger</h3>
+              <p class="project-desc">An interactive 3D blockchain visualizer plotting real-time node transactions and network block verification pathways.</p>
+              <button class="btn btn-outline btn-sm open-modal-btn" data-project="project1" id="project-1-btn">Details & Preview</button>
+            </div>
+          </article>
+
+          <!-- Project 2 -->
+          <article class="project-card" id="project-2">
+            <div class="project-image-container">
+              <div class="project-overlay-glow"></div>
+              <div class="project-visual-mock" style="background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.4) 100%);">
+                <div class="floating-mock-element shape-sphere"></div>
+                <div class="glow-point"></div>
+              </div>
+            </div>
+            <div class="project-info">
+              <div class="project-meta">
+                <span class="project-category">Coming Soon</span>
+              </div>
+              <h3 class="project-name">Neural Net Visualizer</h3>
+              <p class="project-desc">A real-time 3D representation of convolutional neural networks processing live computer vision feeds in the browser.</p>
+              <button class="btn btn-outline btn-sm open-modal-btn" data-project="project2" id="project-2-btn">Details & Preview</button>
+            </div>
+          </article>
+
+          <!-- Project 3 -->
+          <article class="project-card" id="project-3">
+            <div class="project-image-container">
+              <div class="project-overlay-glow"></div>
+              <div class="project-visual-mock" style="background: linear-gradient(135deg, rgba(255, 117, 140, 0.2) 0%, rgba(255, 102, 0, 0.4) 100%);">
+                <div class="floating-mock-element shape-cone"></div>
+                <div class="glow-point"></div>
+              </div>
+            </div>
+            <div class="project-info">
+              <div class="project-meta">
+                <span class="project-category">Coming Soon</span>
+              </div>
+              <h3 class="project-name">Generative Audio Lands</h3>
+              <p class="project-desc">A dynamic canvas turning audio frequencies and acoustic waves into infinite, responsive 3D mesh terrains.</p>
+              <button class="btn btn-outline btn-sm open-modal-btn" data-project="project3" id="project-3-btn">Details & Preview</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Contact -->
+    <section class="section contact-section" id="contact">
+      <div class="container contact-container">
+        <div class="contact-layout">
+          <div class="contact-info-panel">
+            <span class="section-label">Connect</span>
+            <h2 class="section-title">Let's create something <span class="text-gradient">incredible</span> together.</h2>
+            <p class="contact-direct-text">
+              Have a visionary project in mind or want to talk about immersive frontend and WebGL design? Get in touch, and let's craft a digital masterpiece.
+            </p>
+            <div class="contact-details">
+              <div class="contact-item">
+                <span class="icon">✉</span>
+                <span class="value"><a href="mailto:anubhavbiswas01@gmail.com" class="contact-email-link">anubhavbiswas01@gmail.com</a></span>
+              </div>
+              <div class="contact-item">
+                <span class="icon">📞</span>
+                <span class="value"><a href="tel:+918292970588" class="contact-phone-link">+91 8292970588</a></span>
+              </div>
+              <div class="contact-item">
+                <span class="icon">📍</span>
+                <span class="value">Kolkata, India / Remote</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-form-card" id="contact-form-card">
+            <div class="form-glow"></div>
+            <form class="contact-form" id="contact-form">
+              <input type="hidden" name="access_key" value="848b3b1f-388e-429f-b781-0dac6ed6b532">
+              <div class="form-group">
+                <label for="form-name" class="form-label">Name</label>
+                <input type="text" id="form-name" name="name" class="form-input" placeholder="Your name" required>
+              </div>
+              <div class="form-group">
+                <label for="form-email" class="form-label">Email Address</label>
+                <input type="email" id="form-email" name="email" class="form-input" placeholder="yourname@domain.com" required>
+              </div>
+              <div class="form-group">
+                <label for="form-message" class="form-label">Message</label>
+                <textarea id="form-message" name="message" class="form-input form-textarea" placeholder="Describe your vision..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full" id="form-submit-btn">
+                <span>Send Message</span>
+                <span class="arrow">→</span>
+              </button>
+            </form>
+            <div class="form-success-overlay" id="form-success-overlay">
+              <div class="success-content">
+                <div class="success-icon">✓</div>
+                <h3>Message Sent!</h3>
+                <p>Thank you for reaching out. You will get a reply in just 24 hours!</p>
+                <button class="btn btn-outline btn-sm" id="success-reset-btn">Send Another Message</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+      <div class="container footer-container">
+        <p class="copyright">&copy; 2026 Anubhav Biswas. Crafted with passion, code, and geometry.</p>
+        <div class="social-links">
+          <a href="https://github.com/anubhavbiswas01" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GitHub</a>
+          <a href="https://www.linkedin.com/in/anubhav-biswas01" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">LinkedIn</a>
+          <a href="https://instagram.com/anubhav_biswas_official" target="_blank" rel="noopener noreferrer" aria-label="Instagram">Instagram</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Project Details Modals -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-container" id="modal-container">
+      <button class="modal-close" id="modal-close" aria-label="Close Project Details">&times;</button>
+      
+      <!-- Modal Content: Project 1 -->
+      <div class="modal-content-panel active" id="modal-project1">
+        <div class="modal-image-mock" style="background: linear-gradient(135deg, rgba(236, 56, 188, 0.3) 0%, rgba(115, 3, 192, 0.6) 100%);">
+          <div class="modal-floating-shape mock-shader"></div>
+        </div>
+        <div class="modal-body">
+          <span class="modal-tag">Coming Soon</span>
+          <h2 class="modal-title">Quantum Ledger</h2>
+          <p class="modal-description">
+            Quantum Ledger is an upcoming project that renders a live blockchain blockchain network mapping. It will calculate validator workloads, gas price densities, and peer connection nodes, visualizing them as custom interactive 3D particle nodes.
+          </p>
+          <h3 class="modal-subheading">Planned Architecture</h3>
+          <ul class="modal-list">
+            <li>Multi-threaded data parsing using Web Workers to prevent canvas lagging.</li>
+            <li>Interactive orbit system allowing users to traverse block histories.</li>
+            <li>Responsive WebSocket pipelines connecting directly to live mainnets.</li>
+            <li>Custom particle material shaders updating point color thresholds in response to gas fees.</li>
+          </ul>
+          <div class="modal-tech-stack">
+            <span>Three.js</span>
+            <span>Web3.js</span>
+            <span>WebSockets</span>
+            <span>GLSL Shaders</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Content: Project 2 -->
+      <div class="modal-content-panel" id="modal-project2">
+        <div class="modal-image-mock" style="background: linear-gradient(135deg, rgba(0, 242, 254, 0.3) 0%, rgba(79, 172, 254, 0.6) 100%);">
+          <div class="modal-floating-shape mock-simulation"></div>
+        </div>
+        <div class="modal-body">
+          <span class="modal-tag">Coming Soon</span>
+          <h2 class="modal-title">Neural Net Visualizer</h2>
+          <p class="modal-description">
+            Neural Net Visualizer is an upcoming project combining Machine Learning insights with 3D canvas representations. It builds an interactive convolutional network architecture in 3D, tracing data flow and highlighting weights in real-time.
+          </p>
+          <h3 class="modal-subheading">Planned Architecture</h3>
+          <ul class="modal-list">
+            <li>TensorFlow.js execution run pipelines integrated inside the web browser.</li>
+            <li>Dynamic mesh rendering representing neural activation paths and bias weights.</li>
+            <li>Interactive parameters customization panel enabling model training adjustment.</li>
+            <li>Procedural vertex updates reflecting learning rate convergence curves.</li>
+          </ul>
+          <div class="modal-tech-stack">
+            <span>TensorFlow.js</span>
+            <span>Three.js</span>
+            <span>Python</span>
+            <span>Vite</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Content: Project 3 -->
+      <div class="modal-content-panel" id="modal-project3">
+        <div class="modal-image-mock" style="background: linear-gradient(135deg, rgba(255, 117, 140, 0.3) 0%, rgba(255, 102, 0, 0.6) 100%);">
+          <div class="modal-floating-shape mock-racer"></div>
+        </div>
+        <div class="modal-body">
+          <span class="modal-tag">Coming Soon</span>
+          <h2 class="modal-title">Generative Audio Lands</h2>
+          <p class="modal-description">
+            Generative Audio Lands is an upcoming interactive audio experiment. It captures audio input streams (via mic or system player) and converts sound frequencies to deform 3D plane dimensions in real-time.
+          </p>
+          <h3 class="modal-subheading">Planned Architecture</h3>
+          <ul class="modal-list">
+            <li>Web Audio API analyser node mapping amplitude to vertex positions.</li>
+            <li>Simplex noise terrain generation for natural wave motion and valleys.</li>
+            <li>Custom bloom filters rendering neon wireframe lines that bounce to the beat.</li>
+            <li>Audio compression controls enabling smooth data transfer ratios.</li>
+          </ul>
+          <div class="modal-tech-stack">
+            <span>Web Audio API</span>
+            <span>Three.js</span>
+            <span>Simplex Noise</span>
+            <span>GLSL Bloom</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
