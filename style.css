@@ -1639,3 +1639,52 @@ html {
   color: var(--text-muted);
   line-height: 1.4;
 }
+
+/* Certifications Card Styles */
+.certificate-link-card {
+  text-decoration: none;
+  display: block;
+}
+
+.certificate-badge-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--glass-border);
+  padding: 0.75rem;
+  border-radius: 12px;
+  transition: var(--transition-quick);
+}
+
+.certificate-link-card:hover .certificate-badge-card {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 210, 255, 0.08);
+}
+
+.certificate-thumb {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+}
+
+.certificate-details h4 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.certificate-details p {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
