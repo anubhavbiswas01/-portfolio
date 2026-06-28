@@ -531,12 +531,12 @@ function initThemeToggle() {
   const toggleBtn = document.getElementById('theme-toggle-btn');
   const toggleBtnMobile = document.getElementById('theme-toggle-btn-mobile');
   
-  // Set default theme from localStorage or default to dark
-  const currentTheme = localStorage.getItem('theme') || 'dark';
+  // Set default theme from localStorage or default to light
+  const currentTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', currentTheme);
   
   function toggleTheme() {
-    const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
     const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
     
     document.documentElement.setAttribute('data-theme', newTheme);
