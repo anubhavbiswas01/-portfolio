@@ -14,6 +14,8 @@
   
   <!-- CSS Entry -->
   <link rel="stylesheet" href="/style.css">
+  <!-- Google Identity Services (Authentication) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <!-- Full Screen Preloader -->
@@ -52,6 +54,16 @@
         </nav>
         
         <div class="header-actions">
+          <!-- Google Sign-In Button Container -->
+          <div id="google-signin-btn" class="google-btn-container"></div>
+          
+          <!-- User Profile Chip (Shown when logged in) -->
+          <div class="user-profile-chip hidden" id="user-profile-chip">
+            <img src="" alt="User Avatar" class="user-avatar" id="user-avatar">
+            <span class="user-name" id="user-name">Guest</span>
+            <button class="logout-btn" id="logout-btn" aria-label="Log Out">✖</button>
+          </div>
+
           <a href="#contact" class="btn btn-secondary btn-sm" id="header-cta">Hire Me</a>
           <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Navigation Menu">
             <span></span>
@@ -69,6 +81,15 @@
         <a href="#about" class="mobile-nav-item" id="mobile-nav-about">About</a>
         <a href="#projects" class="mobile-nav-item" id="mobile-nav-projects">Projects</a>
         <a href="#contact" class="mobile-nav-item" id="mobile-nav-contact">Contact</a>
+        
+        <!-- Mobile Google Login -->
+        <div id="google-signin-btn-mobile" class="google-btn-container-mobile"></div>
+        <div class="user-profile-chip hidden" id="user-profile-chip-mobile">
+          <img src="" alt="User Avatar" class="user-avatar" id="user-avatar-mobile">
+          <span class="user-name" id="user-name-mobile">Guest</span>
+          <button class="btn btn-outline btn-sm" id="logout-btn-mobile">Logout</button>
+        </div>
+
         <a href="#contact" class="btn btn-primary" id="mobile-nav-cta">Hire Me</a>
       </nav>
     </div>

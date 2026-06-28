@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
   initScrollSpy();
   initHoverEffects();
+  initGoogleAuth();
 });
 
 /* -------------------------------------------------------------
@@ -346,3 +347,132 @@ window.addEventListener('load', () => {
     }, 2000);
   }
 });
+
+/* -------------------------------------------------------------
+ * Google Authentication Integration (Google Identity Services)
+ * ------------------------------------------------------------- */
+function initGoogleAuth() {
+  // Replace this placeholder with your actual Google Client ID from Google Cloud Console
+  const clientID = "1094892408331-5s8kpl9d7k7a493n9r748u3o7m9d1k7b.apps.googleusercontent.com"; 
+
+  if (typeof google === 'undefined') {
+    // If client SDK hasn't loaded yet, retry
+    setTimeout(initGoogleAuth, 100);
+    return;
+  }
+
+  // Initialize Client
+  google.accounts.id.initialize({
+    client_id: clientID,
+    callback: handleCredentialResponse,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
+
+  // Render Google buttons
+  const signinBtn = document.getElementById('google-signin-btn');
+  const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
+
+  if (signinBtn) {
+    google.accounts.id.renderButton(signinBtn, {
+      theme: 'outline',
+      size: 'medium',
+      shape: 'pill',
+      text: 'signin_with',
+      logo_alignment: 'left'
+    });
+  }
+
+  if (signinBtnMobile) {
+    google.accounts.id.renderButton(signinBtnMobile, {
+      theme: 'outline',
+      size: 'large',
+      shape: 'pill',
+      width: 220
+    });
+  }
+
+  // Check for existing session in localStorage
+  const savedUser = localStorage.getItem('google_user');
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser);
+      displayUserProfile(user);
+    } catch (e) {
+      console.error('Failed parsing cached user credentials:', e);
+    }
+  } else {
+    // Show one-tap prompt overlay
+    google.accounts.id.prompt();
+  }
+
+  // Bind logout events
+  const logoutBtn = document.getElementById('logout-btn');
+  const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', logoutUser);
+  }
+  if (logoutBtnMobile) {
+    logoutBtnMobile.addEventListener('click', logoutUser);
+  }
+}
+
+// Handler callback on successful login
+function handleCredentialResponse(response) {
+  try {
+    const userPayload = parseJwt(response.credential);
+    // Cache user credentials client-side
+    localStorage.setItem('google_user', JSON.stringify({
+      name: userPayload.name,
+      picture: userPayload.picture,
+      email: userPayload.email
+    }));
+    
+    displayUserProfile(userPayload);
+  } catch (error) {
+    console.error('Credentials parsing error:', error);
+  }
+}
+
+// Client-side JWT Token Decoder
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+
+  return JSON.parse(jsonPayload);
+}
+
+// Update UI view states
+function displayUserProfile(user) {
+  const signinBtn = document.getElementById('google-signin-btn');
+  const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
+  const profileChip = document.getElementById('user-profile-chip');
+  const profileChipMobile = document.getElementById('user-profile-chip-mobile');
+
+  // Desktop UI Update
+  if (signinBtn) signinBtn.classList.add('hidden');
+  if (profileChip) {
+    profileChip.classList.remove('hidden');
+    document.getElementById('user-avatar').src = user.picture;
+    document.getElementById('user-name').textContent = user.name.split(' ')[0]; // first name
+  }
+
+  // Mobile UI Update
+  if (signinBtnMobile) signinBtnMobile.style.display = 'none';
+  if (profileChipMobile) {
+    profileChipMobile.classList.remove('hidden');
+    document.getElementById('user-avatar-mobile').src = user.picture;
+    document.getElementById('user-name-mobile').textContent = user.name;
+  }
+}
+
+// Handle User Logout
+function logoutUser() {
+  localStorage.removeItem('google_user');
+  google.accounts.id.disableAutoSelect();
+  window.location.reload();
+}
