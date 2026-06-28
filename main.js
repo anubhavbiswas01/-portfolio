@@ -353,7 +353,7 @@ window.addEventListener('load', () => {
  * ------------------------------------------------------------- */
 function initGoogleAuth() {
   // Replace this placeholder with your actual Google Client ID from Google Cloud Console
-  const clientID = "1094892408331-5s8kpl9d7k7a493n9r748u3o7m9d1k7b.apps.googleusercontent.com"; 
+  const clientID = "1049553582122-5eheeoeevc13fij5a2u6f9clktas1kpt.apps.googleusercontent.com"; 
 
   if (typeof google === 'undefined') {
     // If client SDK hasn't loaded yet, retry
