@@ -401,3 +401,24 @@ function tick() {
 
 // Start loop
 tick();
+
+// Theme Change Event Listener to smoothly update WebGL lighting and atmospheres
+window.addEventListener('theme-change', (event) => {
+  const isLight = event.detail.theme === 'light';
+  
+  if (isLight) {
+    // Light mode colors
+    gsap.to(ambientLight.color, { r: 1.0, g: 1.0, b: 1.0, duration: 0.8 });
+    gsap.to(cyanPointLight.color, { r: 0.0, g: 0.46, b: 1.0, duration: 0.8 }); // Royal Blue
+    gsap.to(pinkPointLight.color, { r: 0.3, g: 0.0, b: 1.0, duration: 0.8 }); // Indigo
+  } else {
+    // Dark mode colors
+    const darkAmbient = new THREE.Color('#040e2b');
+    const darkCyan = new THREE.Color('#00d2ff');
+    const darkPink = new THREE.Color('#4d00ff');
+    
+    gsap.to(ambientLight.color, { r: darkAmbient.r, g: darkAmbient.g, b: darkAmbient.b, duration: 0.8 });
+    gsap.to(cyanPointLight.color, { r: darkCyan.r, g: darkCyan.g, b: darkCyan.b, duration: 0.8 });
+    gsap.to(pinkPointLight.color, { r: darkPink.r, g: darkPink.g, b: darkPink.b, duration: 0.8 });
+  }
+});

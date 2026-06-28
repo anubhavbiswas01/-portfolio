@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollSpy();
   initHoverEffects();
   initGoogleAuth();
+  initThemeToggle();
 });
 
 /* -------------------------------------------------------------
@@ -521,4 +522,39 @@ function logoutUser() {
 
   google.accounts.id.disableAutoSelect();
   window.location.reload();
+}
+
+/* -------------------------------------------------------------
+ * Theme Selector: Dark and Light Theme Toggling
+ * ------------------------------------------------------------- */
+function initThemeToggle() {
+  const toggleBtn = document.getElementById('theme-toggle-btn');
+  const toggleBtnMobile = document.getElementById('theme-toggle-btn-mobile');
+  
+  // Set default theme from localStorage or default to dark
+  const currentTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  
+  function toggleTheme() {
+    const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Dispatch custom theme-change event to update Three.js scene
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: newTheme } }));
+  }
+  
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', toggleTheme);
+  }
+  if (toggleBtnMobile) {
+    toggleBtnMobile.addEventListener('click', toggleTheme);
+  }
+  
+  // Dispatch initial load event to make sure Three.js scene aligns with saved preference
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: currentTheme } }));
+  }, 100);
 }

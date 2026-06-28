@@ -31,6 +31,29 @@
   --transition-quick: all 0.2s ease-out;
 }
 
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: rgba(248, 250, 252, 0.85);
+  --bg-darker: #e2e8f0;
+  
+  --accent-cyan: #0076ff; /* electric blue */
+  --accent-blue: #4d00ff; /* deep indigo */
+  --accent-purple: #00d2ff; /* cyan */
+  --accent-pink: #0055ff;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-glow: rgba(0, 118, 255, 0.25);
+  --glass-glow-pink: rgba(0, 85, 255, 0.25);
+  
+  --cursor-color: #0076ff;
+}
+
 /* Reset & Base Elements */
 * {
   margin: 0;
@@ -1717,4 +1740,45 @@ html {
   .header-socials {
     display: none;
   }
+}
+
+/* Theme Toggle Button Styles */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-quick);
+  width: 36px;
+  height: 36px;
+  outline: none;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--glass-border-glow);
+  transform: rotate(15deg) scale(1.05);
+  background: var(--glass-bg-hover);
+}
+
+.theme-icon {
+  font-size: 1rem;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Toggle displays based on data-theme */
+.sun-icon { display: none; }
+.moon-icon { display: block; }
+
+[data-theme="light"] .sun-icon { display: block; }
+[data-theme="light"] .moon-icon { display: none; }
+
+/* Apply smooth transitions to theme shifts */
+body, header, .mobile-nav, .section, .skill-card, .project-card, .contact-form-card, .user-profile-chip, .btn, .nav-item, h1, h2, h3, h4, p, span, a, input, textarea {
+  transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
 }
