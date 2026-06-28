@@ -310,6 +310,17 @@
 
           <div class="contact-form-card" id="contact-form-card">
             <div class="form-glow"></div>
+            
+            <!-- Login Overlay to enforce authentication -->
+            <div class="form-login-overlay" id="form-login-overlay">
+              <div class="login-overlay-content">
+                <span class="lock-icon">🔒</span>
+                <h4>Sign In Required</h4>
+                <p>Please log in with Google to unlock the contact form and send your message.</p>
+                <div id="google-signin-btn-form" class="google-btn-container-form"></div>
+              </div>
+            </div>
+
             <form class="contact-form" id="contact-form">
               <input type="hidden" name="access_key" value="848b3b1f-388e-429f-b781-0dac6ed6b532">
               <div class="form-group">

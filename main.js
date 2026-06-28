@@ -372,6 +372,7 @@ function initGoogleAuth() {
   // Render Google buttons
   const signinBtn = document.getElementById('google-signin-btn');
   const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
+  const signinBtnForm = document.getElementById('google-signin-btn-form');
 
   if (signinBtn) {
     google.accounts.id.renderButton(signinBtn, {
@@ -389,6 +390,15 @@ function initGoogleAuth() {
       size: 'large',
       shape: 'pill',
       width: 220
+    });
+  }
+
+  if (signinBtnForm) {
+    google.accounts.id.renderButton(signinBtnForm, {
+      theme: 'filled_blue',
+      size: 'large',
+      shape: 'pill',
+      width: 240
     });
   }
 
@@ -452,6 +462,7 @@ function displayUserProfile(user) {
   const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
   const profileChip = document.getElementById('user-profile-chip');
   const profileChipMobile = document.getElementById('user-profile-chip-mobile');
+  const loginOverlay = document.getElementById('form-login-overlay');
 
   // Desktop UI Update
   if (signinBtn) signinBtn.classList.add('hidden');
@@ -468,11 +479,46 @@ function displayUserProfile(user) {
     document.getElementById('user-avatar-mobile').src = user.picture;
     document.getElementById('user-name-mobile').textContent = user.name;
   }
+
+  // Unlock contact form and prefill fields
+  if (loginOverlay) {
+    loginOverlay.classList.add('hidden');
+  }
+  
+  const formName = document.getElementById('form-name');
+  const formEmail = document.getElementById('form-email');
+  if (formName) {
+    formName.value = user.name;
+    formName.readOnly = true;
+  }
+  if (formEmail) {
+    formEmail.value = user.email;
+    formEmail.readOnly = true;
+  }
 }
 
 // Handle User Logout
 function logoutUser() {
   localStorage.removeItem('google_user');
+  
+  // Clear prefilled fields
+  const formName = document.getElementById('form-name');
+  const formEmail = document.getElementById('form-email');
+  if (formName) {
+    formName.value = '';
+    formName.readOnly = false;
+  }
+  if (formEmail) {
+    formEmail.value = '';
+    formEmail.readOnly = false;
+  }
+
+  // Lock contact form
+  const loginOverlay = document.getElementById('form-login-overlay');
+  if (loginOverlay) {
+    loginOverlay.classList.remove('hidden');
+  }
+
   google.accounts.id.disableAutoSelect();
   window.location.reload();
 }
