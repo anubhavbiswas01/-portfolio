@@ -1782,3 +1782,48 @@ html {
 body, header, .mobile-nav, .section, .skill-card, .project-card, .contact-form-card, .user-profile-chip, .btn, .nav-item, h1, h2, h3, h4, p, span, a, input, textarea {
   transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
 }
+
+/* Colorful Brand Socials */
+.social-icon-link.social-linkedin {
+  color: #0077b5;
+}
+.social-icon-link.social-github {
+  color: #f0f6fc;
+}
+[data-theme="light"] .social-icon-link.social-github {
+  color: #24292e;
+}
+.social-icon-link.social-instagram {
+  color: #e1306c;
+}
+.social-icon-link.social-whatsapp {
+  color: #25d366;
+}
+.social-icon-link.social-email {
+  color: #ea4335;
+}
+
+/* Hover effects with matching glows */
+.social-icon-link.social-linkedin:hover {
+  filter: drop-shadow(0 0 10px rgba(0, 119, 181, 0.75));
+  transform: translateY(-3px) scale(1.1);
+}
+.social-icon-link.social-github:hover {
+  filter: drop-shadow(0 0 10px rgba(240, 246, 252, 0.75));
+  transform: translateY(-3px) scale(1.1);
+}
+[data-theme="light"] .social-icon-link.social-github:hover {
+  filter: drop-shadow(0 0 10px rgba(36, 41, 46, 0.5));
+}
+.social-icon-link.social-instagram:hover {
+  filter: drop-shadow(0 0 10px rgba(225, 48, 108, 0.75));
+  transform: translateY(-3px) scale(1.1);
+}
+.social-icon-link.social-whatsapp:hover {
+  filter: drop-shadow(0 0 10px rgba(37, 211, 102, 0.75));
+  transform: translateY(-3px) scale(1.1);
+}
+.social-icon-link.social-email:hover {
+  filter: drop-shadow(0 0 10px rgba(234, 67, 53, 0.75));
+  transform: translateY(-3px) scale(1.1);
+}
