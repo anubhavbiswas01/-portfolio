@@ -285,11 +285,11 @@ window.addEventListener('load', () => {
 });
 
 /* -------------------------------------------------------------
- * OTPless Phone & WhatsApp Authentication Integration
+ * WhatsApp OTP Verification Integration
  * ------------------------------------------------------------- */
 
-// Paste your OTPless App ID from the dashboard here to enable real SMS / WhatsApp verification:
-const otplessAppId = "YOUR_OTPLESS_APP_ID"; 
+let generatedCode = null;
+let userPhoneNumber = null;
 
 function initGoogleAuth() {
   // Keep same function hook name to prevent cascading edits in DOMContentLoaded
@@ -304,69 +304,16 @@ function initPhoneAuth() {
   const triggerMobile = document.getElementById('btn-open-otp-mobile');
   const triggerForm = document.getElementById('btn-open-otp-form');
   
-  const loginPageContainer = document.getElementById('otpless-login-page');
-
-  // Define global callback function for OTPless
-  window.otpless = (otplessUser) => {
-    if (otplessUser) {
-      console.log("OTPless Success Data:", otplessUser);
-      // Extract verified phone number (could be waNumber, phoneNumber, or mobile.number)
-      const phone = otplessUser.phoneNumber || 
-                    otplessUser.waNumber || 
-                    (otplessUser.mobile && otplessUser.mobile.number) || 
-                    "Verified User";
-                    
-      localStorage.setItem('verified_phone', phone);
-      
-      // Close modal
-      if (modal) modal.classList.remove('active');
-      
-      // Update UI states
-      displayVerifiedState(phone);
-    }
-  };
-
-  // Load the OTPless script or use a simulator fallback
-  if (otplessAppId && otplessAppId !== "YOUR_OTPLESS_APP_ID") {
-    console.log("Initializing real OTPless Auth SDK...");
-    // Load SDK script dynamically
-    const scriptId = 'otpless-sdk';
-    if (!document.getElementById(scriptId)) {
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.type = 'text/javascript';
-      script.src = 'https://otpless.com/v2/auth.js';
-      script.setAttribute('data-appid', otplessAppId);
-      document.body.appendChild(script);
-    }
-  } else {
-    console.log("Using simulated OTPless Verification (Enter 10-digit number).");
-    if (loginPageContainer) {
-      loginPageContainer.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; width: 100%;">
-          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; text-align: center;">
-            [SIMULATOR MODE]<br>Paste your real OTPless App ID in <code>main.js</code> to enable live SMS / WhatsApp texts.
-          </p>
-          <div class="phone-input-wrapper">
-            <span class="phone-country-code">+91</span>
-            <input type="tel" id="sim-phone-input" placeholder="Enter phone number" style="width: 100%; border: none !important; box-shadow: none !important;">
-          </div>
-          <button class="btn btn-primary" id="btn-sim-verify" style="width: 100%; margin-top: 0.5rem;">Verify OTP</button>
-        </div>
-      `;
-      
-      document.getElementById('btn-sim-verify').addEventListener('click', () => {
-        const phoneVal = document.getElementById('sim-phone-input').value.trim();
-        if (phoneVal.length === 10 && !isNaN(phoneVal)) {
-          window.otpless({
-            phoneNumber: "+91 " + phoneVal
-          });
-        } else {
-          alert("Please enter a valid 10-digit phone number.");
-        }
-      });
-    }
-  }
+  const step1 = document.getElementById('otp-step-1');
+  const step2 = document.getElementById('otp-step-2');
+  
+  const phoneInput = document.getElementById('otp-phone-input');
+  const codeInput = document.getElementById('otp-code-input');
+  
+  const generateBtn = document.getElementById('btn-generate-otp');
+  const whatsappBtn = document.getElementById('btn-send-whatsapp');
+  const verifyBtn = document.getElementById('btn-verify-whatsapp-code');
+  const codeDisplay = document.getElementById('whatsapp-code-display');
 
   // Open Modal Helpers
   function openModal(e) {
@@ -382,6 +329,59 @@ function initPhoneAuth() {
   if (triggerMobile) triggerMobile.addEventListener('click', openModal);
   if (triggerForm) triggerForm.addEventListener('click', openModal);
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  // Step 1: Generate Code
+  if (generateBtn) {
+    generateBtn.addEventListener('click', () => {
+      const phoneVal = phoneInput.value.trim();
+      if (phoneVal.length !== 10 || isNaN(phoneVal)) {
+        alert("Please enter a valid 10-digit phone number.");
+        return;
+      }
+
+      userPhoneNumber = "+91 " + phoneVal;
+      
+      // Generate a random 6-digit OTP
+      generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Display code
+      if (codeDisplay) {
+        codeDisplay.textContent = generatedCode;
+      }
+
+      // Configure WhatsApp Send Link (pre-filled text)
+      // Send to Anubhav's WhatsApp: +918292970588
+      const messageText = `Hello Anubhav! Please verify my phone number: +91${phoneVal}. My verification code is: ${generatedCode}`;
+      const encodedText = encodeURIComponent(messageText);
+      if (whatsappBtn) {
+        whatsappBtn.href = `https://wa.me/918292970588?text=${encodedText}`;
+      }
+
+      // Switch to Step 2
+      if (step1) step1.classList.remove('active');
+      if (step2) step2.classList.add('active');
+    });
+  }
+
+  // Step 2: Verify Code
+  if (verifyBtn) {
+    verifyBtn.addEventListener('click', () => {
+      const codeVal = codeInput.value.trim();
+      if (codeVal.length !== 6 || isNaN(codeVal)) {
+        alert("Please enter a valid 6-digit code.");
+        return;
+      }
+
+      if (codeVal === generatedCode) {
+        // Success
+        localStorage.setItem('verified_phone', userPhoneNumber);
+        closeModal();
+        displayVerifiedState(userPhoneNumber);
+      } else {
+        alert("Incorrect verification code. Please send the code on WhatsApp and enter the same code here.");
+      }
+    });
+  }
 
   // Check for existing session in localStorage
   const savedPhone = localStorage.getItem('verified_phone');
