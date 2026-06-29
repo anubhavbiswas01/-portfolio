@@ -14,10 +14,6 @@
   
   <!-- CSS Entry -->
   <link rel="stylesheet" href="/style.css">
-  <!-- Google Identity Services (Authentication) -->
-  <!-- Firebase App & Auth SDKs (v10 compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <!-- Full Screen Preloader -->
@@ -574,44 +570,16 @@
 
   <!-- Phone OTP Verification Modal -->
   <div class="modal-overlay" id="phone-auth-modal">
-    <div class="modal-card">
+    <div class="modal-card" style="padding: 2rem; max-width: 420px; display: flex; flex-direction: column;">
       <button class="modal-close-btn" id="phone-modal-close">✕</button>
       
-      <div class="modal-header" style="margin-bottom: 1.5rem;">
-        <h3 class="modal-title" style="font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-primary);">Phone Verification</h3>
-        <p class="modal-subtitle" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Verify your phone number to unlock the contact form</p>
+      <div class="modal-header" style="margin-bottom: 1rem;">
+        <h3 class="modal-title" style="font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-primary);">Verification</h3>
+        <p class="modal-subtitle" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Verify your phone number or WhatsApp to unlock the contact form</p>
       </div>
 
-      <!-- Step 1: Phone Input -->
-      <div class="otp-step active" id="otp-step-1">
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label for="otp-phone-input" class="form-label" style="display: block; margin-bottom: 0.5rem;">Phone Number</label>
-          <div class="phone-input-wrapper">
-            <span class="phone-country-code">+91</span>
-            <input type="tel" id="otp-phone-input" placeholder="Enter 10-digit number" maxlength="10">
-          </div>
-        </div>
-        
-        <!-- Recaptcha Container for Firebase -->
-        <div id="recaptcha-container"></div>
-
-        <button class="btn btn-primary btn-full" id="btn-send-otp">Send Verification Code</button>
-      </div>
-
-      <!-- Step 2: OTP Input -->
-      <div class="otp-step" id="otp-step-2">
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label for="otp-code-input" class="form-label" style="display: block; margin-bottom: 0.5rem;">6-Digit Verification Code</label>
-          <input type="text" id="otp-code-input" class="form-input" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; letter-spacing: 0.25em; font-weight: 700; font-family: var(--font-display);">
-        </div>
-        
-        <div class="otp-timer-container">
-          <span class="otp-timer" id="otp-timer-text">Resend code in 30s</span>
-          <button class="resend-link disabled" id="btn-resend-otp">Resend</button>
-        </div>
-
-        <button class="btn btn-primary btn-full" id="btn-verify-otp">Verify Code</button>
-      </div>
+      <!-- OTPless Web Widget Container -->
+      <div id="otpless-login-page" style="margin-top: 0.5rem; min-height: 250px; display: flex; flex-direction: column; justify-content: center;"></div>
     </div>
   </div>
 

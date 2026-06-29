@@ -285,23 +285,11 @@ window.addEventListener('load', () => {
 });
 
 /* -------------------------------------------------------------
- * Firebase Phone Authentication (OTP Verification)
+ * OTPless Phone & WhatsApp Authentication Integration
  * ------------------------------------------------------------- */
 
-// Paste your Firebase web configuration credentials here to enable real SMS OTPs:
-const firebaseConfig = {
-  apiKey: "AIzaSyDjmORbqh4rh0tjXXy8qsAutKQ2w82J4eI",
-  authDomain: "portfolio-49c60.firebaseapp.com",
-  projectId: "portfolio-49c60",
-  storageBucket: "portfolio-49c60.firebasestorage.app",
-  messagingSenderId: "36046642156",
-  appId: "1:36046642156:web:ccc79a3a5255c5d39d3053",
-  measurementId: "G-91FGP8L5TG"
-};
-
-let isRealFirebase = false;
-let recaptchaVerifier = null;
-let confirmationResult = null;
+// Paste your OTPless App ID from the dashboard here to enable real SMS / WhatsApp verification:
+const otplessAppId = "YOUR_OTPLESS_APP_ID"; 
 
 function initGoogleAuth() {
   // Keep same function hook name to prevent cascading edits in DOMContentLoaded
@@ -316,47 +304,67 @@ function initPhoneAuth() {
   const triggerMobile = document.getElementById('btn-open-otp-mobile');
   const triggerForm = document.getElementById('btn-open-otp-form');
   
-  const step1 = document.getElementById('otp-step-1');
-  const step2 = document.getElementById('otp-step-2');
-  
-  const phoneInput = document.getElementById('otp-phone-input');
-  const codeInput = document.getElementById('otp-code-input');
-  
-  const sendBtn = document.getElementById('btn-send-otp');
-  const verifyBtn = document.getElementById('btn-verify-otp');
-  const resendBtn = document.getElementById('btn-resend-otp');
-  const timerText = document.getElementById('otp-timer-text');
-  
-  let countdownInterval = null;
+  const loginPageContainer = document.getElementById('otpless-login-page');
 
-  // Initialize Firebase if config is valid
-  if (typeof firebase !== 'undefined' && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-    try {
-      firebase.initializeApp(firebaseConfig);
-      isRealFirebase = true;
-      console.log("Firebase initialized successfully for real Phone Auth.");
-    } catch (e) {
-      console.warn("Firebase initialization failed, falling back to simulated verification.", e);
+  // Define global callback function for OTPless
+  window.otpless = (otplessUser) => {
+    if (otplessUser) {
+      console.log("OTPless Success Data:", otplessUser);
+      // Extract verified phone number (could be waNumber, phoneNumber, or mobile.number)
+      const phone = otplessUser.phoneNumber || 
+                    otplessUser.waNumber || 
+                    (otplessUser.mobile && otplessUser.mobile.number) || 
+                    "Verified User";
+                    
+      localStorage.setItem('verified_phone', phone);
+      
+      // Close modal
+      if (modal) modal.classList.remove('active');
+      
+      // Update UI states
+      displayVerifiedState(phone);
+    }
+  };
+
+  // Load the OTPless script or use a simulator fallback
+  if (otplessAppId && otplessAppId !== "YOUR_OTPLESS_APP_ID") {
+    console.log("Initializing real OTPless Auth SDK...");
+    // Load SDK script dynamically
+    const scriptId = 'otpless-sdk';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.type = 'text/javascript';
+      script.src = 'https://otpless.com/v2/auth.js';
+      script.setAttribute('data-appid', otplessAppId);
+      document.body.appendChild(script);
     }
   } else {
-    console.log("Using simulated Phone Verification (Enter any 10-digit number; OTP is 123456).");
-  }
-
-  // Set up Recaptcha for real Firebase Phone Auth
-  if (isRealFirebase) {
-    try {
-      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        'size': 'normal',
-        'callback': (response) => {
-          sendBtn.disabled = false;
-        },
-        'expired-callback': () => {
-          sendBtn.disabled = true;
+    console.log("Using simulated OTPless Verification (Enter 10-digit number).");
+    if (loginPageContainer) {
+      loginPageContainer.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; width: 100%;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; text-align: center;">
+            [SIMULATOR MODE]<br>Paste your real OTPless App ID in <code>main.js</code> to enable live SMS / WhatsApp texts.
+          </p>
+          <div class="phone-input-wrapper">
+            <span class="phone-country-code">+91</span>
+            <input type="tel" id="sim-phone-input" placeholder="Enter phone number" style="width: 100%; border: none !important; box-shadow: none !important;">
+          </div>
+          <button class="btn btn-primary" id="btn-sim-verify" style="width: 100%; margin-top: 0.5rem;">Verify OTP</button>
+        </div>
+      `;
+      
+      document.getElementById('btn-sim-verify').addEventListener('click', () => {
+        const phoneVal = document.getElementById('sim-phone-input').value.trim();
+        if (phoneVal.length === 10 && !isNaN(phoneVal)) {
+          window.otpless({
+            phoneNumber: "+91 " + phoneVal
+          });
+        } else {
+          alert("Please enter a valid 10-digit phone number.");
         }
       });
-      recaptchaVerifier.render();
-    } catch (e) {
-      console.error("Recaptcha verifier initialization failed:", e);
     }
   }
 
@@ -374,148 +382,6 @@ function initPhoneAuth() {
   if (triggerMobile) triggerMobile.addEventListener('click', openModal);
   if (triggerForm) triggerForm.addEventListener('click', openModal);
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
-
-  // Send OTP handler
-  if (sendBtn) {
-    sendBtn.addEventListener('click', () => {
-      const phoneNumber = phoneInput.value.trim();
-      if (phoneNumber.length !== 10 || isNaN(phoneNumber)) {
-        alert("Please enter a valid 10-digit phone number.");
-        return;
-      }
-
-      const fullPhoneNumber = "+91" + phoneNumber;
-      sendBtn.disabled = true;
-      sendBtn.textContent = "Sending Code...";
-
-      if (isRealFirebase) {
-        // Real Firebase SMS Dispatch
-        firebase.auth().signInWithPhoneNumber(fullPhoneNumber, recaptchaVerifier)
-          .then((result) => {
-            confirmationResult = result;
-            switchToStep2(fullPhoneNumber);
-          })
-          .catch((error) => {
-            console.error("Error sending SMS:", error);
-            alert("Failed to send code: " + error.message);
-            sendBtn.disabled = false;
-            sendBtn.textContent = "Send Verification Code";
-            if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
-          });
-      } else {
-        // Simulated Code Dispatch (fallback)
-        setTimeout(() => {
-          console.log(`[SIMULATED SMS] OTP sent to ${fullPhoneNumber}. Enter code: 123456`);
-          alert(`[SIMULATING SMS] Verification code sent to ${fullPhoneNumber}!\n\nFor testing, enter the code: 123456`);
-          switchToStep2(fullPhoneNumber);
-        }, 1000);
-      }
-    });
-  }
-
-  function switchToStep2(fullPhone) {
-    step1.classList.remove('active');
-    step2.classList.add('active');
-    
-    // Start countdown timer
-    startCountdown();
-  }
-
-  function startCountdown() {
-    let timeLeft = 30;
-    if (resendBtn) {
-      resendBtn.classList.add('disabled');
-      resendBtn.disabled = true;
-    }
-    if (timerText) timerText.textContent = `Resend code in ${timeLeft}s`;
-
-    clearInterval(countdownInterval);
-    countdownInterval = setInterval(() => {
-      timeLeft--;
-      if (timerText) timerText.textContent = `Resend code in ${timeLeft}s`;
-
-      if (timeLeft <= 0) {
-        clearInterval(countdownInterval);
-        if (timerText) timerText.textContent = "Didn't receive code?";
-        if (resendBtn) {
-          resendBtn.classList.remove('disabled');
-          resendBtn.disabled = false;
-        }
-      }
-    }, 1000);
-  }
-
-  // Resend OTP handler
-  if (resendBtn) {
-    resendBtn.addEventListener('click', () => {
-      const phoneNumber = phoneInput.value.trim();
-      const fullPhoneNumber = "+91" + phoneNumber;
-      
-      startCountdown();
-
-      if (isRealFirebase && confirmationResult) {
-        firebase.auth().signInWithPhoneNumber(fullPhoneNumber, recaptchaVerifier)
-          .then((result) => {
-            confirmationResult = result;
-          })
-          .catch((error) => {
-            console.error("Resend error:", error);
-            alert("Resend failed: " + error.message);
-          });
-      } else {
-        console.log(`[SIMULATED SMS] Code resent. Use code: 123456`);
-        alert("[SIMULATION] Code resent! Use code: 123456");
-      }
-    });
-  }
-
-  // Verify OTP Code handler
-  if (verifyBtn) {
-    verifyBtn.addEventListener('click', () => {
-      const code = codeInput.value.trim();
-      if (code.length !== 6 || isNaN(code)) {
-        alert("Please enter a valid 6-digit verification code.");
-        return;
-      }
-
-      verifyBtn.disabled = true;
-      verifyBtn.textContent = "Verifying...";
-
-      if (isRealFirebase && confirmationResult) {
-        // Real verification
-        confirmationResult.confirm(code)
-          .then((result) => {
-            const user = result.user;
-            const phone = user.phoneNumber;
-            handleSuccessfulVerification(phone);
-          })
-          .catch((error) => {
-            console.error("Code verification failed:", error);
-            alert("Incorrect verification code. Please try again.");
-            verifyBtn.disabled = false;
-            verifyBtn.textContent = "Verify Code";
-          });
-      } else {
-        // Simulated Verification
-        setTimeout(() => {
-          if (code === "123456") {
-            const simulatedPhone = "+91 " + phoneInput.value.trim();
-            handleSuccessfulVerification(simulatedPhone);
-          } else {
-            alert("Incorrect verification code! For simulation testing, please enter '123456'.");
-            verifyBtn.disabled = false;
-            verifyBtn.textContent = "Verify Code";
-          }
-        }, 1000);
-      }
-    });
-  }
-
-  function handleSuccessfulVerification(phone) {
-    localStorage.setItem('verified_phone', phone);
-    closeModal();
-    displayVerifiedState(phone);
-  }
 
   // Check for existing session in localStorage
   const savedPhone = localStorage.getItem('verified_phone');
