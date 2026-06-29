@@ -323,9 +323,9 @@ window.addEventListener('load', () => {
 // 1. Sign up for a free account at https://www.emailjs.com/
 // 2. Create a template and replace these placeholder strings:
 const emailjsConfig = {
-  serviceId: "YOUR_SERVICE_ID",
-  templateId: "YOUR_TEMPLATE_ID",
-  publicKey: "YOUR_PUBLIC_KEY"
+  serviceId: "service_d1rqems",
+  templateId: "template_u6fvjos",
+  publicKey: "BAiT-QXbyTMYkZFXn"
 };
 
 function initGoogleAuth() {
