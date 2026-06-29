@@ -1789,3 +1789,95 @@ body, header, .mobile-nav, .section, .skill-card, .project-card, .contact-form-c
   filter: drop-shadow(0 0 10px rgba(234, 67, 53, 0.75));
   transform: translateY(-3px) scale(1.1);
 }
+
+/* Phone OTP Verification Styles */
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 0 1rem;
+  transition: var(--transition-quick);
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.phone-country-code {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-right: 1px solid var(--glass-border);
+  padding-right: 0.75rem;
+  margin-right: 0.75rem;
+  user-select: none;
+}
+
+.phone-input-wrapper input {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.8rem 0 !important;
+  box-shadow: none !important;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+}
+
+.otp-step {
+  display: none;
+}
+
+.otp-step.active {
+  display: block;
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.otp-timer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+#otp-timer-text {
+  color: var(--text-muted);
+}
+
+.resend-link {
+  background: none;
+  border: none;
+  color: var(--accent-cyan);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 0;
+  transition: var(--transition-quick);
+}
+
+.resend-link.disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#recaptcha-container {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* Make sure modal layout is responsive */
+#phone-auth-modal .modal-card {
+  max-width: 400px;
+}

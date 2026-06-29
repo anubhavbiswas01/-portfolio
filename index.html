@@ -15,7 +15,9 @@
   <!-- CSS Entry -->
   <link rel="stylesheet" href="/style.css">
   <!-- Google Identity Services (Authentication) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Firebase App & Auth SDKs (v10 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <!-- Full Screen Preloader -->
@@ -71,12 +73,12 @@
         </div>
 
         <div class="header-actions">
-          <!-- Google Sign-In Button Container -->
-          <div id="google-signin-btn" class="google-btn-container"></div>
+          <!-- Phone OTP Verification Trigger -->
+          <button class="btn btn-outline btn-sm" id="btn-open-otp-header">Verify Phone</button>
           
-          <!-- User Profile Chip (Shown when logged in) -->
+          <!-- User Profile Chip (Shown when verified) -->
           <div class="user-profile-chip hidden" id="user-profile-chip">
-            <img src="" alt="User Avatar" class="user-avatar" id="user-avatar">
+            <span class="user-avatar-phone" style="font-size: 1rem; margin-right: 0.5rem; user-select: none;">📱</span>
             <span class="user-name" id="user-name">Guest</span>
             <button class="logout-btn" id="logout-btn" aria-label="Log Out">✖</button>
           </div>
@@ -105,12 +107,14 @@
         <a href="#projects" class="mobile-nav-item" id="mobile-nav-projects">Projects</a>
         <a href="#contact" class="mobile-nav-item" id="mobile-nav-contact">Contact</a>
         
-        <!-- Mobile Google Login -->
-        <div id="google-signin-btn-mobile" class="google-btn-container-mobile"></div>
-        <div class="user-profile-chip hidden" id="user-profile-chip-mobile">
-          <img src="" alt="User Avatar" class="user-avatar" id="user-avatar-mobile">
+        <!-- Mobile Phone OTP Verification Trigger -->
+        <button class="btn btn-outline btn-sm" id="btn-open-otp-mobile" style="margin: 1.5rem auto 0; display: block; width: 80%;">Verify Phone</button>
+        
+        <!-- User Profile Chip (Shown when verified) -->
+        <div class="user-profile-chip hidden" id="user-profile-chip-mobile" style="margin-top: 1.5rem;">
+          <span class="user-avatar-phone" style="font-size: 1.1rem; margin-right: 0.5rem; user-select: none;">📱</span>
           <span class="user-name" id="user-name-mobile">Guest</span>
-          <button class="btn btn-outline btn-sm" id="logout-btn-mobile">Logout</button>
+          <button class="btn btn-outline btn-sm" id="logout-btn-mobile" style="margin-left: 0.75rem; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Logout</button>
         </div>
 
         <div class="mobile-socials" style="display: flex; justify-content: center; gap: 1.5rem; margin: 1rem 0 2rem;">
@@ -424,9 +428,9 @@
             <div class="form-login-overlay" id="form-login-overlay">
               <div class="login-overlay-content">
                 <span class="lock-icon">🔒</span>
-                <h4>Sign In Required</h4>
-                <p>Please log in with Google to unlock the contact form and send your message.</p>
-                <div id="google-signin-btn-form" class="google-btn-container-form"></div>
+                <h4>Verification Required</h4>
+                <p>Please verify your phone number via OTP to unlock the contact form.</p>
+                <button class="btn btn-primary btn-sm" id="btn-open-otp-form" style="margin-top: 1rem;">Verify Phone Number</button>
               </div>
             </div>
 
@@ -439,6 +443,10 @@
               <div class="form-group">
                 <label for="form-email" class="form-label">Email Address</label>
                 <input type="email" id="form-email" name="email" class="form-input" placeholder="yourname@domain.com" required>
+              </div>
+              <div class="form-group">
+                <label for="form-phone" class="form-label">Verified Phone Number</label>
+                <input type="tel" id="form-phone" name="phone" class="form-input" placeholder="Verify via OTP" required readonly>
               </div>
               <div class="form-group">
                 <label for="form-message" class="form-label">Message</label>
@@ -561,6 +569,49 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Phone OTP Verification Modal -->
+  <div class="modal-overlay" id="phone-auth-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="phone-modal-close">✕</button>
+      
+      <div class="modal-header" style="margin-bottom: 1.5rem;">
+        <h3 class="modal-title" style="font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-primary);">Phone Verification</h3>
+        <p class="modal-subtitle" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Verify your phone number to unlock the contact form</p>
+      </div>
+
+      <!-- Step 1: Phone Input -->
+      <div class="otp-step active" id="otp-step-1">
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="otp-phone-input" class="form-label" style="display: block; margin-bottom: 0.5rem;">Phone Number</label>
+          <div class="phone-input-wrapper">
+            <span class="phone-country-code">+91</span>
+            <input type="tel" id="otp-phone-input" placeholder="Enter 10-digit number" maxlength="10">
+          </div>
+        </div>
+        
+        <!-- Recaptcha Container for Firebase -->
+        <div id="recaptcha-container"></div>
+
+        <button class="btn btn-primary btn-full" id="btn-send-otp">Send Verification Code</button>
+      </div>
+
+      <!-- Step 2: OTP Input -->
+      <div class="otp-step" id="otp-step-2">
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label for="otp-code-input" class="form-label" style="display: block; margin-bottom: 0.5rem;">6-Digit Verification Code</label>
+          <input type="text" id="otp-code-input" class="form-input" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; letter-spacing: 0.25em; font-weight: 700; font-family: var(--font-display);">
+        </div>
+        
+        <div class="otp-timer-container">
+          <span class="otp-timer" id="otp-timer-text">Resend code in 30s</span>
+          <button class="resend-link disabled" id="btn-resend-otp">Resend</button>
+        </div>
+
+        <button class="btn btn-primary btn-full" id="btn-verify-otp">Verify Code</button>
+      </div>
     </div>
   </div>
 

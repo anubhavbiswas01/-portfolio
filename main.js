@@ -285,168 +285,294 @@ window.addEventListener('load', () => {
 });
 
 /* -------------------------------------------------------------
- * Google Authentication Integration (Google Identity Services)
+ * Firebase Phone Authentication (OTP Verification)
  * ------------------------------------------------------------- */
+
+// Paste your Firebase web configuration credentials here to enable real SMS OTPs:
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let isRealFirebase = false;
+let recaptchaVerifier = null;
+let confirmationResult = null;
+
 function initGoogleAuth() {
-  // Replace this placeholder with your actual Google Client ID from Google Cloud Console
-  const clientID = "1049553582122-5eheeoeevc13fij5a2u6f9clktas1kpt.apps.googleusercontent.com"; 
+  // Keep same function hook name to prevent cascading edits in DOMContentLoaded
+  initPhoneAuth();
+}
 
-  if (typeof google === 'undefined') {
-    // If client SDK hasn't loaded yet, retry
-    setTimeout(initGoogleAuth, 100);
-    return;
+function initPhoneAuth() {
+  const modal = document.getElementById('phone-auth-modal');
+  const closeBtn = document.getElementById('phone-modal-close');
+  
+  const triggerHeader = document.getElementById('btn-open-otp-header');
+  const triggerMobile = document.getElementById('btn-open-otp-mobile');
+  const triggerForm = document.getElementById('btn-open-otp-form');
+  
+  const step1 = document.getElementById('otp-step-1');
+  const step2 = document.getElementById('otp-step-2');
+  
+  const phoneInput = document.getElementById('otp-phone-input');
+  const codeInput = document.getElementById('otp-code-input');
+  
+  const sendBtn = document.getElementById('btn-send-otp');
+  const verifyBtn = document.getElementById('btn-verify-otp');
+  const resendBtn = document.getElementById('btn-resend-otp');
+  const timerText = document.getElementById('otp-timer-text');
+  
+  let countdownInterval = null;
+
+  // Initialize Firebase if config is valid
+  if (typeof firebase !== 'undefined' && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      isRealFirebase = true;
+      console.log("Firebase initialized successfully for real Phone Auth.");
+    } catch (e) {
+      console.warn("Firebase initialization failed, falling back to simulated verification.", e);
+    }
+  } else {
+    console.log("Using simulated Phone Verification (Enter any 10-digit number; OTP is 123456).");
   }
 
-  // Initialize Client
-  google.accounts.id.initialize({
-    client_id: clientID,
-    callback: handleCredentialResponse,
-    auto_select: false,
-    cancel_on_tap_outside: true
-  });
+  // Set up Recaptcha for real Firebase Phone Auth
+  if (isRealFirebase) {
+    try {
+      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'normal',
+        'callback': (response) => {
+          sendBtn.disabled = false;
+        },
+        'expired-callback': () => {
+          sendBtn.disabled = true;
+        }
+      });
+      recaptchaVerifier.render();
+    } catch (e) {
+      console.error("Recaptcha verifier initialization failed:", e);
+    }
+  }
 
-  // Render Google buttons
-  const signinBtn = document.getElementById('google-signin-btn');
-  const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
-  const signinBtnForm = document.getElementById('google-signin-btn-form');
+  // Open Modal Helpers
+  function openModal(e) {
+    e.preventDefault();
+    if (modal) modal.classList.add('active');
+  }
 
-  if (signinBtn) {
-    google.accounts.id.renderButton(signinBtn, {
-      theme: 'outline',
-      size: 'medium',
-      shape: 'pill',
-      text: 'signin_with',
-      logo_alignment: 'left'
+  function closeModal() {
+    if (modal) modal.classList.remove('active');
+  }
+
+  if (triggerHeader) triggerHeader.addEventListener('click', openModal);
+  if (triggerMobile) triggerMobile.addEventListener('click', openModal);
+  if (triggerForm) triggerForm.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  // Send OTP handler
+  if (sendBtn) {
+    sendBtn.addEventListener('click', () => {
+      const phoneNumber = phoneInput.value.trim();
+      if (phoneNumber.length !== 10 || isNaN(phoneNumber)) {
+        alert("Please enter a valid 10-digit phone number.");
+        return;
+      }
+
+      const fullPhoneNumber = "+91" + phoneNumber;
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Sending Code...";
+
+      if (isRealFirebase) {
+        // Real Firebase SMS Dispatch
+        firebase.auth().signInWithPhoneNumber(fullPhoneNumber, recaptchaVerifier)
+          .then((result) => {
+            confirmationResult = result;
+            switchToStep2(fullPhoneNumber);
+          })
+          .catch((error) => {
+            console.error("Error sending SMS:", error);
+            alert("Failed to send code: " + error.message);
+            sendBtn.disabled = false;
+            sendBtn.textContent = "Send Verification Code";
+            if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
+          });
+      } else {
+        // Simulated Code Dispatch (fallback)
+        setTimeout(() => {
+          console.log(`[SIMULATED SMS] OTP sent to ${fullPhoneNumber}. Enter code: 123456`);
+          alert(`[SIMULATING SMS] Verification code sent to ${fullPhoneNumber}!\n\nFor testing, enter the code: 123456`);
+          switchToStep2(fullPhoneNumber);
+        }, 1000);
+      }
     });
   }
 
-  if (signinBtnMobile) {
-    google.accounts.id.renderButton(signinBtnMobile, {
-      theme: 'outline',
-      size: 'large',
-      shape: 'pill',
-      width: 220
+  function switchToStep2(fullPhone) {
+    step1.classList.remove('active');
+    step2.classList.add('active');
+    
+    // Start countdown timer
+    startCountdown();
+  }
+
+  function startCountdown() {
+    let timeLeft = 30;
+    if (resendBtn) {
+      resendBtn.classList.add('disabled');
+      resendBtn.disabled = true;
+    }
+    if (timerText) timerText.textContent = `Resend code in ${timeLeft}s`;
+
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      timeLeft--;
+      if (timerText) timerText.textContent = `Resend code in ${timeLeft}s`;
+
+      if (timeLeft <= 0) {
+        clearInterval(countdownInterval);
+        if (timerText) timerText.textContent = "Didn't receive code?";
+        if (resendBtn) {
+          resendBtn.classList.remove('disabled');
+          resendBtn.disabled = false;
+        }
+      }
+    }, 1000);
+  }
+
+  // Resend OTP handler
+  if (resendBtn) {
+    resendBtn.addEventListener('click', () => {
+      const phoneNumber = phoneInput.value.trim();
+      const fullPhoneNumber = "+91" + phoneNumber;
+      
+      startCountdown();
+
+      if (isRealFirebase && confirmationResult) {
+        firebase.auth().signInWithPhoneNumber(fullPhoneNumber, recaptchaVerifier)
+          .then((result) => {
+            confirmationResult = result;
+          })
+          .catch((error) => {
+            console.error("Resend error:", error);
+            alert("Resend failed: " + error.message);
+          });
+      } else {
+        console.log(`[SIMULATED SMS] Code resent. Use code: 123456`);
+        alert("[SIMULATION] Code resent! Use code: 123456");
+      }
     });
   }
 
-  if (signinBtnForm) {
-    google.accounts.id.renderButton(signinBtnForm, {
-      theme: 'filled_blue',
-      size: 'large',
-      shape: 'pill',
-      width: 240
+  // Verify OTP Code handler
+  if (verifyBtn) {
+    verifyBtn.addEventListener('click', () => {
+      const code = codeInput.value.trim();
+      if (code.length !== 6 || isNaN(code)) {
+        alert("Please enter a valid 6-digit verification code.");
+        return;
+      }
+
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = "Verifying...";
+
+      if (isRealFirebase && confirmationResult) {
+        // Real verification
+        confirmationResult.confirm(code)
+          .then((result) => {
+            const user = result.user;
+            const phone = user.phoneNumber;
+            handleSuccessfulVerification(phone);
+          })
+          .catch((error) => {
+            console.error("Code verification failed:", error);
+            alert("Incorrect verification code. Please try again.");
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = "Verify Code";
+          });
+      } else {
+        // Simulated Verification
+        setTimeout(() => {
+          if (code === "123456") {
+            const simulatedPhone = "+91 " + phoneInput.value.trim();
+            handleSuccessfulVerification(simulatedPhone);
+          } else {
+            alert("Incorrect verification code! For simulation testing, please enter '123456'.");
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = "Verify Code";
+          }
+        }, 1000);
+      }
     });
+  }
+
+  function handleSuccessfulVerification(phone) {
+    localStorage.setItem('verified_phone', phone);
+    closeModal();
+    displayVerifiedState(phone);
   }
 
   // Check for existing session in localStorage
-  const savedUser = localStorage.getItem('google_user');
-  if (savedUser) {
-    try {
-      const user = JSON.parse(savedUser);
-      displayUserProfile(user);
-    } catch (e) {
-      console.error('Failed parsing cached user credentials:', e);
-    }
-  } else {
-    // Show one-tap prompt overlay
-    google.accounts.id.prompt();
+  const savedPhone = localStorage.getItem('verified_phone');
+  if (savedPhone) {
+    displayVerifiedState(savedPhone);
   }
 
   // Bind logout events
   const logoutBtn = document.getElementById('logout-btn');
   const logoutBtnMobile = document.getElementById('logout-btn-mobile');
 
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', logoutUser);
-  }
-  if (logoutBtnMobile) {
-    logoutBtnMobile.addEventListener('click', logoutUser);
-  }
+  if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
+  if (logoutBtnMobile) logoutBtnMobile.addEventListener('click', logoutUser);
 }
 
-// Handler callback on successful login
-function handleCredentialResponse(response) {
-  try {
-    const userPayload = parseJwt(response.credential);
-    // Cache user credentials client-side
-    localStorage.setItem('google_user', JSON.stringify({
-      name: userPayload.name,
-      picture: userPayload.picture,
-      email: userPayload.email
-    }));
-    
-    displayUserProfile(userPayload);
-  } catch (error) {
-    console.error('Credentials parsing error:', error);
-  }
-}
-
-// Client-side JWT Token Decoder
-function parseJwt(token) {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
-
-  return JSON.parse(jsonPayload);
-}
-
-// Update UI view states
-function displayUserProfile(user) {
-  const signinBtn = document.getElementById('google-signin-btn');
-  const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
+// Display verified state across UI
+function displayVerifiedState(phone) {
+  const triggerHeader = document.getElementById('btn-open-otp-header');
+  const triggerMobile = document.getElementById('btn-open-otp-mobile');
+  
   const profileChip = document.getElementById('user-profile-chip');
   const profileChipMobile = document.getElementById('user-profile-chip-mobile');
+  
   const loginOverlay = document.getElementById('form-login-overlay');
+  const formPhone = document.getElementById('form-phone');
 
-  // Desktop UI Update
-  if (signinBtn) signinBtn.classList.add('hidden');
+  // Desktop Update
+  if (triggerHeader) triggerHeader.classList.add('hidden');
   if (profileChip) {
     profileChip.classList.remove('hidden');
-    document.getElementById('user-avatar').src = user.picture;
-    document.getElementById('user-name').textContent = user.name.split(' ')[0]; // first name
+    document.getElementById('user-name').textContent = phone;
   }
 
-  // Mobile UI Update
-  if (signinBtnMobile) signinBtnMobile.style.display = 'none';
+  // Mobile Update
+  if (triggerMobile) triggerMobile.style.display = 'none';
   if (profileChipMobile) {
     profileChipMobile.classList.remove('hidden');
-    document.getElementById('user-avatar-mobile').src = user.picture;
-    document.getElementById('user-name-mobile').textContent = user.name;
+    document.getElementById('user-name-mobile').textContent = phone;
   }
 
-  // Unlock contact form and prefill fields
+  // Unlock contact form
   if (loginOverlay) {
     loginOverlay.classList.add('hidden');
   }
-  
-  const formName = document.getElementById('form-name');
-  const formEmail = document.getElementById('form-email');
-  if (formName) {
-    formName.value = user.name;
-    formName.readOnly = true;
-  }
-  if (formEmail) {
-    formEmail.value = user.email;
-    formEmail.readOnly = true;
+  if (formPhone) {
+    formPhone.value = phone;
+    formPhone.readOnly = true;
   }
 }
 
 // Handle User Logout
 function logoutUser() {
-  localStorage.removeItem('google_user');
+  localStorage.removeItem('verified_phone');
   
-  // Clear prefilled fields
-  const formName = document.getElementById('form-name');
-  const formEmail = document.getElementById('form-email');
-  if (formName) {
-    formName.value = '';
-    formName.readOnly = false;
-  }
-  if (formEmail) {
-    formEmail.value = '';
-    formEmail.readOnly = false;
+  const formPhone = document.getElementById('form-phone');
+  if (formPhone) {
+    formPhone.value = '';
+    formPhone.readOnly = false;
   }
 
   // Lock contact form
@@ -455,7 +581,6 @@ function logoutUser() {
     loginOverlay.classList.remove('hidden');
   }
 
-  google.accounts.id.disableAutoSelect();
   window.location.reload();
 }
 
