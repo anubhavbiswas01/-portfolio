@@ -285,161 +285,168 @@ window.addEventListener('load', () => {
 });
 
 /* -------------------------------------------------------------
- * WhatsApp OTP Verification Integration
+ * Google Authentication Integration (Google Identity Services)
  * ------------------------------------------------------------- */
-
-let generatedCode = null;
-let userPhoneNumber = null;
-
 function initGoogleAuth() {
-  // Keep same function hook name to prevent cascading edits in DOMContentLoaded
-  initPhoneAuth();
-}
+  // Replace this placeholder with your actual Google Client ID from Google Cloud Console
+  const clientID = "1049553582122-5eheeoeevc13fij5a2u6f9clktas1kpt.apps.googleusercontent.com"; 
 
-function initPhoneAuth() {
-  const modal = document.getElementById('phone-auth-modal');
-  const closeBtn = document.getElementById('phone-modal-close');
-  
-  const triggerHeader = document.getElementById('btn-open-otp-header');
-  const triggerMobile = document.getElementById('btn-open-otp-mobile');
-  const triggerForm = document.getElementById('btn-open-otp-form');
-  
-  const step1 = document.getElementById('otp-step-1');
-  const step2 = document.getElementById('otp-step-2');
-  
-  const phoneInput = document.getElementById('otp-phone-input');
-  const codeInput = document.getElementById('otp-code-input');
-  
-  const generateBtn = document.getElementById('btn-generate-otp');
-  const whatsappBtn = document.getElementById('btn-send-whatsapp');
-  const verifyBtn = document.getElementById('btn-verify-whatsapp-code');
-  const codeDisplay = document.getElementById('whatsapp-code-display');
-
-  // Open Modal Helpers
-  function openModal(e) {
-    e.preventDefault();
-    if (modal) modal.classList.add('active');
+  if (typeof google === 'undefined') {
+    // If client SDK hasn't loaded yet, retry
+    setTimeout(initGoogleAuth, 100);
+    return;
   }
 
-  function closeModal() {
-    if (modal) modal.classList.remove('active');
-  }
+  // Initialize Client
+  google.accounts.id.initialize({
+    client_id: clientID,
+    callback: handleCredentialResponse,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
 
-  if (triggerHeader) triggerHeader.addEventListener('click', openModal);
-  if (triggerMobile) triggerMobile.addEventListener('click', openModal);
-  if (triggerForm) triggerForm.addEventListener('click', openModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  // Render Google buttons
+  const signinBtn = document.getElementById('google-signin-btn');
+  const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
+  const signinBtnForm = document.getElementById('google-signin-btn-form');
 
-  // Step 1: Generate Code
-  if (generateBtn) {
-    generateBtn.addEventListener('click', () => {
-      const phoneVal = phoneInput.value.trim();
-      if (phoneVal.length !== 10 || isNaN(phoneVal)) {
-        alert("Please enter a valid 10-digit phone number.");
-        return;
-      }
-
-      userPhoneNumber = "+91 " + phoneVal;
-      
-      // Generate a random 6-digit OTP
-      generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // Display code
-      if (codeDisplay) {
-        codeDisplay.textContent = generatedCode;
-      }
-
-      // Configure WhatsApp Send Link (pre-filled text)
-      // Send to Anubhav's WhatsApp: +918292970588
-      const messageText = `Hello Anubhav! Please verify my phone number: +91${phoneVal}. My verification code is: ${generatedCode}`;
-      const encodedText = encodeURIComponent(messageText);
-      if (whatsappBtn) {
-        whatsappBtn.href = `https://wa.me/918292970588?text=${encodedText}`;
-      }
-
-      // Switch to Step 2
-      if (step1) step1.classList.remove('active');
-      if (step2) step2.classList.add('active');
+  if (signinBtn) {
+    google.accounts.id.renderButton(signinBtn, {
+      theme: 'outline',
+      size: 'medium',
+      shape: 'pill',
+      text: 'signin_with',
+      logo_alignment: 'left'
     });
   }
 
-  // Step 2: Verify Code
-  if (verifyBtn) {
-    verifyBtn.addEventListener('click', () => {
-      const codeVal = codeInput.value.trim();
-      if (codeVal.length !== 6 || isNaN(codeVal)) {
-        alert("Please enter a valid 6-digit code.");
-        return;
-      }
+  if (signinBtnMobile) {
+    google.accounts.id.renderButton(signinBtnMobile, {
+      theme: 'outline',
+      size: 'large',
+      shape: 'pill',
+      width: 220
+    });
+  }
 
-      if (codeVal === generatedCode) {
-        // Success
-        localStorage.setItem('verified_phone', userPhoneNumber);
-        closeModal();
-        displayVerifiedState(userPhoneNumber);
-      } else {
-        alert("Incorrect verification code. Please send the code on WhatsApp and enter the same code here.");
-      }
+  if (signinBtnForm) {
+    google.accounts.id.renderButton(signinBtnForm, {
+      theme: 'filled_blue',
+      size: 'large',
+      shape: 'pill',
+      width: 240
     });
   }
 
   // Check for existing session in localStorage
-  const savedPhone = localStorage.getItem('verified_phone');
-  if (savedPhone) {
-    displayVerifiedState(savedPhone);
+  const savedUser = localStorage.getItem('google_user');
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser);
+      displayUserProfile(user);
+    } catch (e) {
+      console.error('Failed parsing cached user credentials:', e);
+    }
+  } else {
+    // Show one-tap prompt overlay
+    google.accounts.id.prompt();
   }
 
   // Bind logout events
   const logoutBtn = document.getElementById('logout-btn');
   const logoutBtnMobile = document.getElementById('logout-btn-mobile');
 
-  if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
-  if (logoutBtnMobile) logoutBtnMobile.addEventListener('click', logoutUser);
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', logoutUser);
+  }
+  if (logoutBtnMobile) {
+    logoutBtnMobile.addEventListener('click', logoutUser);
+  }
 }
 
-// Display verified state across UI
-function displayVerifiedState(phone) {
-  const triggerHeader = document.getElementById('btn-open-otp-header');
-  const triggerMobile = document.getElementById('btn-open-otp-mobile');
-  
+// Handler callback on successful login
+function handleCredentialResponse(response) {
+  try {
+    const userPayload = parseJwt(response.credential);
+    // Cache user credentials client-side
+    localStorage.setItem('google_user', JSON.stringify({
+      name: userPayload.name,
+      picture: userPayload.picture,
+      email: userPayload.email
+    }));
+    
+    displayUserProfile(userPayload);
+  } catch (error) {
+    console.error('Credentials parsing error:', error);
+  }
+}
+
+// Client-side JWT Token Decoder
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+
+  return JSON.parse(jsonPayload);
+}
+
+// Update UI view states
+function displayUserProfile(user) {
+  const signinBtn = document.getElementById('google-signin-btn');
+  const signinBtnMobile = document.getElementById('google-signin-btn-mobile');
   const profileChip = document.getElementById('user-profile-chip');
   const profileChipMobile = document.getElementById('user-profile-chip-mobile');
-  
   const loginOverlay = document.getElementById('form-login-overlay');
-  const formPhone = document.getElementById('form-phone');
 
-  // Desktop Update
-  if (triggerHeader) triggerHeader.classList.add('hidden');
+  // Desktop UI Update
+  if (signinBtn) signinBtn.classList.add('hidden');
   if (profileChip) {
     profileChip.classList.remove('hidden');
-    document.getElementById('user-name').textContent = phone;
+    document.getElementById('user-avatar').src = user.picture;
+    document.getElementById('user-name').textContent = user.name.split(' ')[0]; // first name
   }
 
-  // Mobile Update
-  if (triggerMobile) triggerMobile.style.display = 'none';
+  // Mobile UI Update
+  if (signinBtnMobile) signinBtnMobile.style.display = 'none';
   if (profileChipMobile) {
     profileChipMobile.classList.remove('hidden');
-    document.getElementById('user-name-mobile').textContent = phone;
+    document.getElementById('user-avatar-mobile').src = user.picture;
+    document.getElementById('user-name-mobile').textContent = user.name;
   }
 
-  // Unlock contact form
+  // Unlock contact form and prefill fields
   if (loginOverlay) {
     loginOverlay.classList.add('hidden');
   }
-  if (formPhone) {
-    formPhone.value = phone;
-    formPhone.readOnly = true;
+  
+  const formName = document.getElementById('form-name');
+  const formEmail = document.getElementById('form-email');
+  if (formName) {
+    formName.value = user.name;
+    formName.readOnly = true;
+  }
+  if (formEmail) {
+    formEmail.value = user.email;
+    formEmail.readOnly = true;
   }
 }
 
 // Handle User Logout
 function logoutUser() {
-  localStorage.removeItem('verified_phone');
+  localStorage.removeItem('google_user');
   
-  const formPhone = document.getElementById('form-phone');
-  if (formPhone) {
-    formPhone.value = '';
-    formPhone.readOnly = false;
+  // Clear prefilled fields
+  const formName = document.getElementById('form-name');
+  const formEmail = document.getElementById('form-email');
+  if (formName) {
+    formName.value = '';
+    formName.readOnly = false;
+  }
+  if (formEmail) {
+    formEmail.value = '';
+    formEmail.readOnly = false;
   }
 
   // Lock contact form
@@ -448,6 +455,7 @@ function logoutUser() {
     loginOverlay.classList.remove('hidden');
   }
 
+  google.accounts.id.disableAutoSelect();
   window.location.reload();
 }
 
