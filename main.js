@@ -2,14 +2,12 @@ import './three-scene.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   initSplitText();
-  initCustomCursor();
   initHeaderScroll();
   initMobileNavigation();
   initTiltCards();
   initProjectsModal();
   initContactForm();
   initScrollSpy();
-  initHoverEffects();
   initGoogleAuth();
   initThemeToggle();
 });
@@ -31,56 +29,7 @@ function initSplitText() {
   });
 }
 
-/* -------------------------------------------------------------
- * Custom Cursor Implementation
- * ------------------------------------------------------------- */
-function initCustomCursor() {
-  const cursor = document.getElementById('custom-cursor');
-  const glow = document.getElementById('custom-cursor-glow');
 
-  if (!cursor || !glow) return;
-
-  let mouseX = 0;
-  let mouseY = 0;
-  let cursorX = 0;
-  let cursorY = 0;
-  let glowX = 0;
-  let glowY = 0;
-
-  window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  });
-
-  // Animation loop for smooth cursor lag
-  function animateCursor() {
-    // Fast follow for the core cursor
-    cursorX += (mouseX - cursorX) * 0.25;
-    cursorY += (mouseY - cursorY) * 0.25;
-    cursor.style.left = `${cursorX}px`;
-    cursor.style.top = `${cursorY}px`;
-
-    // Slower lag follow for the outer glow ring
-    glowX += (mouseX - glowX) * 0.15;
-    glowY += (mouseY - glowY) * 0.15;
-    glow.style.left = `${glowX}px`;
-    glow.style.top = `${glowY}px`;
-
-    requestAnimationFrame(animateCursor);
-  }
-  animateCursor();
-
-  // Hide cursor on mouse leave
-  document.addEventListener('mouseleave', () => {
-    cursor.style.opacity = '0';
-    glow.style.opacity = '0';
-  });
-
-  document.addEventListener('mouseenter', () => {
-    cursor.style.opacity = '1';
-    glow.style.opacity = '1';
-  });
-}
 
 /* -------------------------------------------------------------
  * Header Scroll Effect
@@ -321,21 +270,7 @@ function initScrollSpy() {
   });
 }
 
-/* -------------------------------------------------------------
- * Handle Cursor Hover States for Buttons / Links
- * ------------------------------------------------------------- */
-function initHoverEffects() {
-  const interactiveElements = document.querySelectorAll('a, button, input, textarea, .project-card, .tilt-card');
-  
-  interactiveElements.forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      document.body.classList.add('cursor-hover');
-    });
-    el.addEventListener('mouseleave', () => {
-      document.body.classList.remove('cursor-hover');
-    });
-  });
-}
+
 
 // Dismiss preloader and notify 3D scene on window load
 window.addEventListener('load', () => {

@@ -145,45 +145,7 @@ h1, h2, h3, h4 {
   text-shadow: 0 0 8px rgba(0, 242, 254, 0.6), 0 0 20px rgba(0, 242, 254, 0.3);
 }
 
-/* Custom Cursor */
-.custom-cursor {
-  width: 8px;
-  height: 8px;
-  background-color: var(--cursor-color);
-  border-radius: 50%;
-  position: fixed;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 9999;
-  transition: width 0.3s, height 0.3s, background-color 0.3s;
-}
 
-.custom-cursor-glow {
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--cursor-color);
-  background-color: rgba(0, 242, 254, 0.03);
-  border-radius: 50%;
-  position: fixed;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 9998;
-  transition: transform 0.1s ease-out, width 0.3s, height 0.3s, border-color 0.3s, background-color 0.3s;
-}
-
-/* Hover state for links / buttons */
-body.cursor-hover .custom-cursor {
-  width: 16px;
-  height: 16px;
-  background-color: var(--accent-pink);
-}
-
-body.cursor-hover .custom-cursor-glow {
-  width: 50px;
-  height: 50px;
-  border-color: var(--accent-pink);
-  background-color: rgba(236, 56, 188, 0.08);
-}
 
 /* Buttons */
 .btn {
