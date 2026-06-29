@@ -290,12 +290,13 @@ window.addEventListener('load', () => {
 
 // Paste your Firebase web configuration credentials here to enable real SMS OTPs:
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDjmORbqh4rh0tjXXy8qsAutKQ2w82J4eI",
+  authDomain: "portfolio-49c60.firebaseapp.com",
+  projectId: "portfolio-49c60",
+  storageBucket: "portfolio-49c60.firebasestorage.app",
+  messagingSenderId: "36046642156",
+  appId: "1:36046642156:web:ccc79a3a5255c5d39d3053",
+  measurementId: "G-91FGP8L5TG"
 };
 
 let isRealFirebase = false;
