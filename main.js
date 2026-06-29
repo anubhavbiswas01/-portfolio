@@ -203,7 +203,38 @@ function initContactForm() {
       
       if (response.status === 200) {
         successOverlay.classList.add('active');
+        
+        // Trigger EmailJS Autoresponder if configuration is enabled
+        const visitorEmail = formData.get('email');
+        const visitorName = formData.get('name');
+        if (typeof emailjs !== 'undefined' && emailjsConfig.serviceId && emailjsConfig.serviceId !== "YOUR_SERVICE_ID") {
+          try {
+            emailjs.init(emailjsConfig.publicKey);
+            emailjs.send(emailjsConfig.serviceId, emailjsConfig.templateId, {
+              to_name: visitorName,
+              to_email: visitorEmail,
+              reply_to: "anubhavbiswas01@gmail.com",
+              contact_number: "8292970588"
+            });
+            console.log('Autoresponder email sent to ' + visitorEmail);
+          } catch (err) {
+            console.error('EmailJS Autoresponder error:', err);
+          }
+        }
+        
         form.reset();
+        
+        // Re-prefill logged in user info if still active
+        const savedUser = localStorage.getItem('google_user');
+        if (savedUser) {
+          try {
+            const user = JSON.parse(savedUser);
+            const formName = document.getElementById('form-name');
+            const formEmail = document.getElementById('form-email');
+            if (formName) { formName.value = user.name; formName.readOnly = true; }
+            if (formEmail) { formEmail.value = user.email; formEmail.readOnly = true; }
+          } catch (e) {}
+        }
       } else {
         console.error('Error submitting form:', json.message);
         alert('Something went wrong. Please try again.');
@@ -285,14 +316,22 @@ window.addEventListener('load', () => {
 });
 
 /* -------------------------------------------------------------
- * Google Authentication Integration (Google Identity Services)
+ * Google Authentication & EmailJS Autoresponder Settings
  * ------------------------------------------------------------- */
+
+// To enable auto-reply emails to visitors who submit the contact form:
+// 1. Sign up for a free account at https://www.emailjs.com/
+// 2. Create a template and replace these placeholder strings:
+const emailjsConfig = {
+  serviceId: "YOUR_SERVICE_ID",
+  templateId: "YOUR_TEMPLATE_ID",
+  publicKey: "YOUR_PUBLIC_KEY"
+};
+
 function initGoogleAuth() {
-  // Replace this placeholder with your actual Google Client ID from Google Cloud Console
   const clientID = "1049553582122-5eheeoeevc13fij5a2u6f9clktas1kpt.apps.googleusercontent.com"; 
 
   if (typeof google === 'undefined') {
-    // If client SDK hasn't loaded yet, retry
     setTimeout(initGoogleAuth, 100);
     return;
   }
@@ -348,7 +387,6 @@ function initGoogleAuth() {
       console.error('Failed parsing cached user credentials:', e);
     }
   } else {
-    // Show one-tap prompt overlay
     google.accounts.id.prompt();
   }
 
@@ -356,19 +394,14 @@ function initGoogleAuth() {
   const logoutBtn = document.getElementById('logout-btn');
   const logoutBtnMobile = document.getElementById('logout-btn-mobile');
 
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', logoutUser);
-  }
-  if (logoutBtnMobile) {
-    logoutBtnMobile.addEventListener('click', logoutUser);
-  }
+  if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
+  if (logoutBtnMobile) logoutBtnMobile.addEventListener('click', logoutUser);
 }
 
 // Handler callback on successful login
 function handleCredentialResponse(response) {
   try {
     const userPayload = parseJwt(response.credential);
-    // Cache user credentials client-side
     localStorage.setItem('google_user', JSON.stringify({
       name: userPayload.name,
       picture: userPayload.picture,
@@ -437,7 +470,6 @@ function displayUserProfile(user) {
 function logoutUser() {
   localStorage.removeItem('google_user');
   
-  // Clear prefilled fields
   const formName = document.getElementById('form-name');
   const formEmail = document.getElementById('form-email');
   if (formName) {
